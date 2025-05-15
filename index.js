@@ -24,6 +24,33 @@ async function run() {
     await client.connect();
 
     const coffeesCollection = client.db("coffeedb").collection("coffees");
+    const userCollection = client.db("coffeedb").collection("users");
+
+    app.get("/users", async (req, res) => {
+      const result = await userCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.get("/users/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await userCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.post("/users", async (req, res) => {
+      const newUser = req.body;
+      console.log(newUser);
+      const result = await userCollection.insertOne(newUser);
+      res.send(result);
+    });
+
+    app.delete("/users/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await userCollection.deleteOne(query);
+      res.send(result);
+    });
 
     app.get("/coffees", async (req, res) => {
       const result = await coffeesCollection.find().toArray();
@@ -62,13 +89,10 @@ async function run() {
       res.send(result);
     });
   } finally {
+    // ekhane close use kora jai
   }
 }
 run().catch(console.dir);
-
-app.get("/", (req, res) => {
-  res.send("hello boysss");
-});
 
 app.listen(port, () => {
   console.log("server is running at", port);
